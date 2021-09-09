@@ -22,7 +22,7 @@ class VideoModel(BaseModel):
     uploaded : Optional[str] = None
     channel : Optional[str] = None
     keywords : List[str] = None
-    duration : str
+    duration : Optional[str] = None
     link : str
     playlist : str
 

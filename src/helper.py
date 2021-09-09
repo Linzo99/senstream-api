@@ -42,12 +42,14 @@ class Helper:
             found = Playlist.objects(pk=play['id'])
             if found :
                 found = found[0]
-                update = False
-                if found.videoCount < int(play['videoCount']):
-                    update = True
+                update = dict()
+                if found.videoCount and found.videoCount < int(play['videoCount']):
+                    update.update(self._parsePlaylist(play))
+                if found.viewCount and found.viewCount < update.get('viewCount', 0):
+                    update = update if update else self._parsePlaylist(play) 
             
                 if update :
-                    return found.update(videoCount = int(play['videoCount']))
+                    return found.update(**update)
             else:
                 print(f"{play['title']} is a new Playlist")
                 self._updateChannel( play['channel'] )

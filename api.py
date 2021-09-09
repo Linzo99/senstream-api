@@ -1,6 +1,8 @@
+from mongoengine import connect
 from fastapi import FastAPI
 from src.handlers import video, channel, playlist
 
+connect("senstream")
 app = FastAPI()
 
 """ routes for videos """

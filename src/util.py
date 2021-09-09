@@ -30,7 +30,7 @@ class Util:
         if not os.path.exists(json_file): raise Exception(f"Error: no such file found for {json_file}")
 
         print(f"Importing collection: {collection} from: {json_file}")
-        cmd = ["mongoimport","--d",dbName,"--collection",collection,"--file",json_file,"--upsert"]
+        cmd = ["mongoimport","--db",dbName,"--collection",collection,"--file",json_file,"--upsert"]
         return self.executeCommand(cmd)
 
     def _resetTemp(self, tmp_path=tempDir):

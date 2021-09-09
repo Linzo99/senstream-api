@@ -9,7 +9,7 @@ class Video(Document):
     rating = FloatField()
     published = StringField()
     uploaded = StringField()
-    duration = StringField(required=True)
+    duration = StringField()
     link = URLField(required=True)
     playlist = StringField(required=True)
     channel = StringField(required=True)

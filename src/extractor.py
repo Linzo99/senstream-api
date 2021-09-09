@@ -28,7 +28,7 @@ class Extractor:
         one = re.compile(r'.*(sais\D*\d+).*(epis\D*\d+.*)', re.IGNORECASE)
         two = re.compile(r'.*(epis\D*\d+.*)', re.IGNORECASE)
         if one.match(vid['title']):
-            title = self.name+" "+"-".join(one.match(vid['title']).group(1, 2))
+            title = self.name+" "+" - ".join(one.match(vid['title']).group(1, 2))
             return self._extractVideo(vid, title)
         elif two.match(vid['title']):
             title = self.name +' '+two.match(vid['title']).group(1)
