@@ -37,5 +37,5 @@ def getChannel(id:str):
         channel = Channel.objects(_id=id).get()
         return channel
     except Exception as e:
-        return {}
+        return None
 

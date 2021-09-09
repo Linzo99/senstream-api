@@ -1,14 +1,17 @@
 from .models.Channel import Channel
 from .models.Video import Video
 from .models.Playlist import Playlist
+from mongoengine import connect
 from .constants import PLAY_MAP, CHAN_MAP
 import re
+
 
 
 class Helper:
     """ Helper for adding data in mongodb """
     def __init__(self, name:str):
         self.name = name
+        connect("senstream")
 
     def _updateChannel(self, chan):
         """ Create a playlist or Update if exists """

@@ -9,9 +9,7 @@ from src.constants import collections, dbName
 from src.extractor import Extractor
 from src.models.Playlist import Playlist
 from src.util import Util
-from mongoengine import connect
 
-connect(dbName)
 util = Util() 
 loop = asyncio.get_event_loop()
 
@@ -59,17 +57,21 @@ def add_video(play_name:str, link:str):
 @click.command()
 @click.option('-r', '--run', help="Run SenStream API and start scraping", is_flag=True)
 @click.option('-s', '--server', help="Run SenStream API without scraping", is_flag=True)
+@click.option('--scrape', help="Start Scraping", is_flag=True)
 @click.option('-e', '--export', 'collection', help="Export a collection to a JSON file", type=str)
 @click.option('-i', '--import', "file", help="Import a collection", type=click.Path(exists=True))
 @click.option('-p', '--playlist', help="Add a new playlist", nargs=2, type=(str, str))
 @click.option('-v', '--video', help="Add a new video <PlaylistName> <videoLink>", nargs=2, type=(str, str))
-def cli(run, server, collection, file, playlist, video):
+def cli(run, server, collection, file, playlist, video, scrape):
     if run :
         """ Run the API and start scraping """
         Index._startAPI(True) 
     elif server:
         """ Run the API without scraping """
         Index._startAPI(False) 
+    elif scrape:
+        """ Start the scraping process """
+        Index._scraper.scrape()
     elif collection : 
         """ Export a collection """
         if collection in collections: util.exportCollection(collection)

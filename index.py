@@ -1,8 +1,12 @@
-from src.scraper import Scraper
-from src.util import Util
-from src.constants import dbName
+import time
+from multiprocessing import Process
+
 import schedule
 import uvicorn
+
+from src.constants import dbName
+from src.scraper import Scraper
+from src.util import Util
 
 
 class Index:
@@ -15,18 +19,10 @@ class Index:
     def _startAPI(start):
         try:
             Index._util.setLastUpdated()
-            if start : Index._scraper.scrape()                
-            print("API STARTED")
+            if start : Process(target=Index._scraper.scrape).start()
             uvicorn.run('api:app', reload=True, debug=True, workers=3)
         except Exception as e:
             print(e)
 
 if __name__ == "__main__":
     Index._startAPI(False)
-
-
-    
-
-
-
-

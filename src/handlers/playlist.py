@@ -55,4 +55,4 @@ def getPlaylist(id:str):
         playlist = Playlist.objects(_id=id).get()
         return playlist
     except Exception as e:
-        return {}
+        return None

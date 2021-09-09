@@ -60,4 +60,4 @@ def getMovie(id:str):
         movie = Video.objects(_id=id).get()
         return movie
     except Exception as e:
-        return {}
+        return None
