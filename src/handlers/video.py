@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter
 from pydantic import BaseModel
 from ..models.Video import Video
+from mongoengine.queryset.visitor import Q
 import re
 
 router = APIRouter(prefix='/videos')
@@ -32,15 +33,28 @@ class VideoModel(BaseModel):
 
 
 @router.get('/', response_model=List[VideoModel])
-def getAllVideos(ord:Optional[str]=None, sort:Optional[str]=None, c:Optional[str]=None, p:Optional[str]=None, s:Optional[str]=None):
-    """ Get all the movies """
+def getAllVideos(ord:Optional[str]=None, 
+                 sort:Optional[str]=None, 
+                 c:Optional[str]=None, 
+                 p:Optional[str]=None, 
+                 l:Optional[int]=25, 
+                 s:Optional[str]=None):
+    """ Get all the movies 
+        `sort` to sort by value (viewCount | rating | uploaded)
+        `ord` for ordering the sorted result ( asc | desc )
+        `c` to filter by channel
+        `p` to filter by playlist
+        `s` for searching
+        `l` the number of result desired
+    
+    """
     if not sort: sort = ('-viewCount', '-rating')
     else: 
         if not ord : ord = "dec"
         if ord=="asc": sort = (sort,)
         if ord=="dec": sort = ('-'+sort,)
 
-    videos =  Video.objects.order_by(*sort)
+    videos =  Video.objects.order_by(*sort)[:l]
     if p : videos = videos.filter(playlist=p)
     elif c : videos = videos.filter(channel=c)
     if s : 
@@ -50,6 +64,7 @@ def getAllVideos(ord:Optional[str]=None, sort:Optional[str]=None, c:Optional[str
             regex += f".*({re.escape(w)}*).*"
         regex = re.compile(regex, flags=re.I | re.DOTALL)
         videos = videos.filter(title=regex)
+    else: videos = videos.filter(title__not__icontains="annonce")
     return list(videos)
 
 

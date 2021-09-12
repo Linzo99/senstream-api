@@ -32,7 +32,8 @@ def getAllChannels():
 
 @router.get('/{id}', response_model=ChannelModel)
 def getChannel(id:str):
-    """ Get channel by id """ 
+    """ Get channel by id 
+    """ 
     try:
         channel = Channel.objects(_id=id).get()
         return channel

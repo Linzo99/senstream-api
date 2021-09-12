@@ -71,14 +71,14 @@ class Helper:
                 found = found[0]
                 update = {'description':vid['description'], 'published':vid['published'], 'uploaded':vid['uploaded']}
                 print(f"{vid['title']} already exist")
-                if found.viewCount and found.viewCount < vid['viewCount']:
+                if found.viewCount and (found.viewCount < vid['viewCount']):
                     update['viewCount'] = vid['viewCount']
-                elif found.rating and found.rating < vid['rating']:
+                if found.rating and (found.rating < vid['rating']):
                     update['rating'] = vid['rating']
-                elif found.title != vid['title']:
-                    print(f"{vid['title']} is updating")
+                if found.title != vid['title']:
                     update['title'] = vid['title']
                 if update :
+                    print(f"{vid['title']} is updating")
                     return found.update(**update)
             else:
                 print(f"{vid['title']} is a new video")

@@ -28,15 +28,25 @@ class PlaylistModel(BaseModel):
 
 
 @router.get('/', response_model=List[PlaylistModel])
-def getAllPlaylist(ord:Optional[str]=None, sort:Optional[str]=None, c:Optional[str]=None, s:Optional[str]=None):
-    """ Get all the playlists """
+def getAllPlaylist(ord:Optional[str]=None,
+                   sort:Optional[str]=None,
+                   c:Optional[str]=None, 
+                   l:Optional[int]=15, 
+                   s:Optional[str]=None):
+    """ Get all the playlists 
+        `sort` to sort by value (viewCount | rating | uploaded)
+        `ord` for ordering the sorted result ( asc | desc )
+        `c` to filter by channel
+        `s` for searching
+        `l` the number of result desired
+    """
     if not sort: sort = ('-viewCount', '-videoCount')
     else: 
         if not ord : ord = "dec"
         if ord=="asc": sort = (sort,)
         if ord=="dec": sort = ('-'+sort,)
 
-    playlists =  Playlist.objects.order_by(*sort)
+    playlists =  Playlist.objects.order_by(*sort)[:l]
     if c : playlists = playlists.filter(channel=c)
     if s : 
         regex = ""

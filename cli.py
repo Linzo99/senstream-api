@@ -38,6 +38,7 @@ def add_video(play_name:str, link:str):
             _id = play.result()['result'][0]['id']
             exist = Playlist.objects(_id=_id)
             if exist:
+                extractor.name = exist.title
                 videoCount = play.result()['result'][0]['videoCount']
                 play = {'id':_id, 'videoCount':videoCount }
                 data = ytb.Video.getInfo(link)
