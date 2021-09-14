@@ -26,10 +26,16 @@ class PlaylistModel(BaseModel):
         arbitrary_types_allowed = True
         orm_mode = True
 
+class ReturnData(BaseModel):
+    results : List[PlaylistModel]
+    page : int
+    total_pages : int
 
-@router.get('/', response_model=List[PlaylistModel])
+
+@router.get('/', response_model=ReturnData)
 def getAllPlaylist(ord:Optional[str]=None,
                    sort:Optional[str]=None,
+                   page:Optional[int]=1,
                    c:Optional[str]=None, 
                    l:Optional[int]=15, 
                    s:Optional[str]=None):
@@ -40,13 +46,14 @@ def getAllPlaylist(ord:Optional[str]=None,
         `s` for searching
         `l` the number of result desired
     """
+    offset = (page - 1) * l
     if not sort: sort = ('-viewCount', '-videoCount')
     else: 
         if not ord : ord = "dec"
         if ord=="asc": sort = (sort,)
         if ord=="dec": sort = ('-'+sort,)
 
-    playlists =  Playlist.objects.order_by(*sort)[:l]
+    playlists =  Playlist.objects.order_by(*sort)[offset:offset+l]
     if c : playlists = playlists.filter(channel=c)
     if s : 
         regex = ""
@@ -55,7 +62,8 @@ def getAllPlaylist(ord:Optional[str]=None,
             regex += f".*({re.escape(w)}*).*"
         regex = re.compile(regex, flags=re.I | re.DOTALL)
         playlists = playlists.filter(title=regex)
-    return list(playlists)
+    total_pages = round(playlists.count() / l)
+    return {"results":list(playlists), "page":page, "total_pages":total_pages}
 
 
 @router.get("/{id}", response_model=PlaylistModel)
