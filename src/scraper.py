@@ -1,5 +1,6 @@
 from mongoengine import connect
-from .constants import PROVIDERS, collections
+from .models.Playlist import Playlist
+from .constants import PROVIDERS, collections, dbName
 from .extractor import Extractor
 from .util import Util
 
@@ -10,11 +11,23 @@ class Scraper:
         self._util = Util()
 
     def scrape(self):
-        for provider in PROVIDERS:
-            try:
-                extractor = Extractor(provider['name'], provider['url'])
-                extractor._getAllVideos()
-                for col in collections : self._util.exportCollection(col) 
-            except Exception as e:
-                print(e)
+        connect(dbName)
+        playlists = Playlist.objects.all()
+        if len(playlists) > len(PROVIDERS):
+            for provider in playlists:
+                try:
+                    extractor = Extractor(provider.title, provider.link)
+                    extractor._getAllVideos()
+                    for col in collections : self._util.exportCollection(col) 
+                except Exception as e:
+                    print(e)
+        else:
+            for provider in PROVIDERS:
+                try:
+                    extractor = Extractor(provider['name'], provider['url'])
+                    extractor._getAllVideos()
+                    for col in collections : self._util.exportCollection(col) 
+                except Exception as e:
+                    print(e)
+
 
