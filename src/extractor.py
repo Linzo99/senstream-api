@@ -1,4 +1,4 @@
-import youtubesearchpython.__future__ as ytb
+import youtubesearchpython as ytb
 from .constants import VID_MAP
 from .helper import Helper
 import re
@@ -19,7 +19,7 @@ class Extractor:
         viewCount = int(vid['viewCount']['text']) if "viewCount" in vid else 0
         video = { key:vid.get(val, None) if key!="rating" else vid.get(val, 0) for key,val in VID_MAP.items() }
         video.update( { 'title':title, 'viewCount':viewCount })
-        return self._helper.addVideo(video)
+        return video
 
 
 
@@ -36,24 +36,28 @@ class Extractor:
 
 
 
-    async def _getAllVideos(self):
+    def _getAllVideos(self):
         """ Get all videos on the playlist """
         try:
             playlist = ytb.Playlist(self._provider)
             print(self.name)
             while playlist.hasMoreVideos:
                 print('Getting more videos ..............')
-                await playlist.getNextVideos()
+                playlist.getNextVideos()
             print("Feched All videos !")
 
+
+            self._helper._updatePlaylist(playlist.info['info'])
+            self._helper._updateChannel(playlist.info['info']['channel'])
             for vid in playlist.videos:
                 try:
-                    data = await ytb.Video.getInfo(vid['link'])
+                    data = ytb.Video.getInfo(vid['link'])
                 except:
                     data = vid
-                channel = playlist.info['channel']['id']
-                data.update( { 'duration': vid['duration'], 'playlist' : playlist.info, 'channel':channel} )
+                channel = playlist.info['info']['channel']['id']
+                data.update( { 'duration': vid['duration'], 'playlist' : playlist.info['info']['id'], 'channel':channel} )
                 video = self._getVideoData(data)
+                if video: self._helper.addVideo(video)
             return 
 
         except Exception as e:

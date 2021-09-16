@@ -1,5 +1,6 @@
 from .models.Channel import Channel
 from .models.Video import Video
+import logging
 from .models.Playlist import Playlist
 from mongoengine import connect
 from .constants import PLAY_MAP, CHAN_MAP
@@ -33,35 +34,32 @@ class Helper:
         view_match = re.compile(r'(\d+).*')
         viewCount = view_match.match(play['viewCount']).group(1)
         videoCount = int(play['videoCount'])
-        play['thumbnails'] = play['thumbnails']['thumbnails']
+        try:
+            play['thumbnails'] = play['thumbnails']['thumbnails']
+        except:
+            play['thumbnails'] = play['thumbnails']
         data = { key:play[val] for key,val in PLAY_MAP.items() }
-        data.update( {'viewCount' : int(viewCount), 'videoCount':videoCount, 'channel':play['channel']['id'] } )
+        data.update( {'title':self.name, 'viewCount' : int(viewCount), 'videoCount':videoCount, 'channel':play['channel']['id'] } )
         return data
 
 
     def _updatePlaylist(self, play):
         """ Create a playlist or Update if exists """
-        try:
-            found = Playlist.objects(pk=play['id'])
-            if found :
-                found = found[0]
-                update = dict()
-                if found.videoCount and found.videoCount < int(play['videoCount']):
-                    update.update(self._parsePlaylist(play))
-                if found.viewCount and found.viewCount < update.get('viewCount', 0):
-                    update = update if update else self._parsePlaylist(play) 
-            
-                if update :
-                    return found.update(**update)
-            else:
-                print(f"{play['title']} is a new Playlist")
-                self._updateChannel( play['channel'] )
-                data = self._parsePlaylist(play)
-                return Playlist(**data).save()
-
-        except Exception as e:
-            print("Error Playlist", e)
-
+        found = Playlist.objects(pk=play['id'])
+        if found :
+            found = found[0]
+            update = dict()
+            if found.videoCount and found.videoCount < int(play['videoCount']):
+                update.update(self._parsePlaylist(play))
+            if found.viewCount and found.viewCount < update.get('viewCount', 0):
+                update = update if update else self._parsePlaylist(play) 
+        
+            if len(update) :
+                return found.update(**update)
+        else:
+            print(f"{play['title']} is a new Playlist")
+            data = self._parsePlaylist(play)
+            return Playlist(**data).save()
 
     def _updateVideo(self, vid):
         """ Add a video or Update if exist """
@@ -69,7 +67,7 @@ class Helper:
             found = Video.objects(pk=vid['_id'])
             if found :
                 found = found[0]
-                update = {'description':vid['description'], 'published':vid['published'], 'uploaded':vid['uploaded']}
+                update = dict()
                 print(f"{vid['title']} already exist")
                 if found.viewCount and (found.viewCount < vid['viewCount']):
                     update['viewCount'] = vid['viewCount']
@@ -77,13 +75,11 @@ class Helper:
                     update['rating'] = vid['rating']
                 if found.title != vid['title']:
                     update['title'] = vid['title']
-                if update :
+                if len(update) :
                     print(f"{vid['title']} is updating")
                     return found.update(**update)
             else:
                 print(f"{vid['title']} is a new video")
-                self._updatePlaylist( vid['playlist'] )
-                vid['playlist'] = vid['playlist']['id']
                 return Video(**vid).save()
 
         except Exception as e:

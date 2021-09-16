@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
 from fastapi import APIRouter
 from pydantic import BaseModel
+import math
 from ..models.Video import Video
 import re
 
@@ -54,7 +55,7 @@ def getAllVideos(ord:Optional[str]=None,
     
     """
     offset = (page - 1) * l
-    if not sort: sort = ('-viewCount', '-rating')
+    if not sort: sort = ('-uploaded', '-viewCount')
     else: 
         if not ord : ord = "dec"
         if ord=="asc": sort = (sort,)
@@ -71,7 +72,7 @@ def getAllVideos(ord:Optional[str]=None,
         regex = re.compile(regex, flags=re.I | re.DOTALL)
         videos = videos.filter(title=regex)
     else: videos = videos.filter(title__not__icontains="annonce")
-    total_pages = round(videos.count() / l)
+    total_pages = math.ceil(videos.count() / l)
     return { "results": list(videos), "page":page, "total_pages":total_pages}
 
 

@@ -1,4 +1,3 @@
-import asyncio
 import os
 
 import click
@@ -11,7 +10,6 @@ from src.models.Playlist import Playlist
 from src.util import Util
 
 util = Util() 
-loop = asyncio.get_event_loop()
 
 
 def handle_import(file):
@@ -26,7 +24,7 @@ def handle_import(file):
 def create_playlist(name:str, link:str):
     """ Add a new playlist or update if exists """
     extractor = Extractor(name, link)
-    loop.run_until_complete(extractor._getAllVideos()) 
+    extractor._getAllVideos() 
     for col in collections : util.exportCollection(col) 
 
 def add_video(play_name:str, link:str):
@@ -38,11 +36,14 @@ def add_video(play_name:str, link:str):
             _id = play.result()['result'][0]['id']
             exist = Playlist.objects(_id=_id)
             if exist:
-                extractor.name = exist.title
+                extractor.name = exist[0].title
                 videoCount = play.result()['result'][0]['videoCount']
-                play = {'id':_id, 'videoCount':videoCount }
+                play = {'id':_id, 'videoCount':videoCount, 'viewCount':exist[0].viewCount }
                 data = ytb.Video.getInfo(link)
-                channel = data['channel']['id']
+                try:
+                    channel = data['channel']['id']
+                except:
+                    channel = data['info']['channel']['id']
                 data.update( {'playlist' : play, 'channel':channel} )
                 video = extractor._getVideoData(data)
                 for col in collections : util.exportCollection(col) 
