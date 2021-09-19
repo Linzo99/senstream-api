@@ -27,6 +27,7 @@ class Scraper:
                     extractor = Extractor(provider['name'], provider['url'])
                     extractor._getAllVideos()
                     for col in collections : self._util.exportCollection(col) 
+                    self._util.setLastUpdated()
                 except Exception as e:
                     print(e)
 
