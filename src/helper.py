@@ -53,8 +53,10 @@ class Helper:
                 update.update(self._parsePlaylist(play))
             if found.viewCount and found.viewCount < update.get('viewCount', 0):
                 update = update if update else self._parsePlaylist(play) 
-        
-            if len(update) :
+            if found.title and found.title != self.name:
+                update.update({"title":self.name})
+            if update:
+                print("Updating playlist")
                 return found.update(**update)
         else:
             print(f"{play['title']} is a new Playlist")
