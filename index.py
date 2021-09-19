@@ -1,7 +1,6 @@
 import time
 from multiprocessing import Process
 
-import schedule
 import uvicorn
 
 from src.constants import dbName
