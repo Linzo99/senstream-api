@@ -17,6 +17,7 @@ class Extractor:
         """ Extract correctly the data for the model """
         title = title
         viewCount = int(vid['viewCount']['text']) if "viewCount" in vid else 0
+        vid['averageRating'] = 0 if not vid['averageRating'] else vid['averageRating']
         video = { key:vid.get(val, None) if key!="rating" else vid.get(val, 0) for key,val in VID_MAP.items() }
         video.update( { 'title':title, 'viewCount':viewCount })
         return video
